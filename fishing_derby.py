@@ -1,6 +1,7 @@
 import gym
 import copy
 import random
+import time
 
 # CONSTANTS
 ITERATIONS = 1
@@ -30,15 +31,41 @@ lookup_colors = { (167, 26, 26): "red", (24, 26, 167): "blue",
        (66, 72, 200): "purple/blue", (232, 232, 74): "yellow",
        (0, 0, 0): "black", (45, 50, 184): "blue", 
        (0, 0, 148): "blue", (228, 111, 111): "pink" }
+
+lookup_colors_shorthand = { (167, 26, 26): "R", (24, 26, 167): "B",
+       (117, 128, 240): "P", (72, 160, 72): "G",
+       (66, 72, 200): "P", (232, 232, 74): "Y",
+       (0, 0, 0): "BLK", (45, 50, 184): "B", 
+       (0, 0, 148): "B", (228, 111, 111): "P" }
+       
        
 def get_color(r, g, b):
     """ Get the string representation of a color """
-    return lookup_colors[(r, g, b)]
+    return lookup_colors_shorthand[(r, g, b)]
 
 def observation_to_colors(arr):
     """ 2d array of observation to 2d array of colors """
     ret = [[get_color(rgb[0], rgb[1], rgb[2]) for rgb in row] for row in arr]
     return ret
+
+def get_print_outs(obs):
+    obs_colors = observation_to_colors(observation)
+    for row in range(len(obs_colors)):
+        print(row)
+        for col in range(len(obs_colors[0])):
+            #print(col)
+            print(obs_colors[row][col] + " ", end='')
+        print("\n")
+
+def detect_fishing_rod_2(obs):
+    previous = 'B'
+    for cc in range(99, 132):
+        for rr, row in enumerate(reversed(obs)):
+            is_shark = obs[rr][cc] == "BLK" and obs[rr][cc - 1] == "BLK" and obs[rr][cc + 1] == "BLK"
+            if obs[rr][cc] == "BLK" and previous == "B" and rr != 190 and not is_shark:
+                print("row: " + str(rr) + " col: " + str(cc))
+            previous = obs[rr][cc]
+    
 
 def detect_fishing_rod(obs):
     """ using a 2d array of rgb values, detects the end of the fishing rod
@@ -71,7 +98,8 @@ def detect_fishing_rod(obs):
 
 for _ in range(ITERATIONS):
     done = False
-    ii = 0 
+    ii = 0
+    once = False 
     while ii < MAX_MOVES and not done:
         ii += 1
         # epsilon greedy
@@ -85,10 +113,15 @@ for _ in range(ITERATIONS):
         # step returns observation: env.observation_space, reward: float, done: bool, info: dict
         observation, reward, done, info = env.step(action)
         obs_colors = observation_to_colors(observation)
-        l = detect_fishing_rod(obs_colors)
+        detect_fishing_rod_2(obs_colors)
+        """
+        if once == False:
+            get_print_outs(obs_colors)
+            once = True
+        """
+        #l = detect_fishing_rod(obs_colors)
         #l.add(f"red: {rgb[0]} green: {rgb[1]} blue: {rgb[2]}")
-        print('step')
-        print(l)
+        #print('step')
     env.reset()
 env.close()
 

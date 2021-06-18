@@ -3,3 +3,4 @@ include
 lib
 Roms
 .DS_Store
+.vscode
