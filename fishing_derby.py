@@ -64,13 +64,35 @@ def detect_fishing_rod(obs):
             is_fish = obs[rr][cc] == "Y" and (obs[rr][cc - 1] == "Y" or obs[rr][cc - 2] == "Y" or obs[rr][cc + 1] == "Y" or obs[rr][cc - 1] == "Y")
             is_rod = obs[rr][cc] == "Y" and obs[rr][cc - 1] == "B" and obs[rr][cc + 1] == "B" and obs[rr][cc - 2] == "B" and obs[rr][cc + 2] == "B"
             if rr < 187 and is_rod and not is_fish:
-                print("row: " + str(rr) + " col: " + str(cc))
+                print("row: " + str(len(obs) - rr) + " col: " + str(cc))
             previous = obs[rr][cc]
+
+
+ACTIONS_MOVE_ROD = {
+    0: "NOOP",
+    1: "FIRE",
+    2: "UP",
+    3: "RIGHT",
+    4: "LEFT",
+    5: lambda rod_pos: (rod_pos[0] + 2, rod_pos[1]),
+    6: "UPRIGHT",
+    7: "UPLEFT",
+    8: "DOWNRIGHT",
+    9: "DOWNLEFT",
+    10: "UPFIRE",
+    11: "RIGHTFIRE",
+    12: "LEFTFIRE",
+    13: "DOWNFIRE",
+    14: "UPRIGHTFIRE",
+    15: "UPLEFTFIRE",
+    16: "DOWNRIGHTFIRE",
+    17: "DOWNLEFTFIRE",
+}
 
 for _ in range(ITERATIONS):
     done = False
     ii = 0
-    once = False 
+    rod_pos = (77, 43)
     while ii < MAX_MOVES and not done:
         ii += 1
         # epsilon greedy
@@ -78,14 +100,16 @@ for _ in range(ITERATIONS):
             action = env.action_space.sample()
         else:
             action = 5# env.action_space.sample() # find best action given state most likely max(Q[current_hook_x][current_hook_y])
-
+        rod_pos = ACTIONS_MOVE_ROD[action](rod_pos)
+        print(f"manual move: {rod_pos}")
         env.render()
         # env.action_space returns all actions, sample picks a random action
         # step returns observation: env.observation_space, reward: float, done: bool, info: dict
         observation, reward, done, info = env.step(action)
         obs_colors = observation_to_colors(observation)
         detect_fishing_rod(obs_colors)
-        time.sleep(.5)
+        time.sleep(1)
+        print("next")
         """
         if once == False and ii == 100:
             get_print_outs(obs_colors)
