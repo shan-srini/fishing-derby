@@ -58,14 +58,15 @@ def get_print_outs(obs):
         print("\n")
 
 def detect_fishing_rod(obs):
-    previous = "B"
-    for cc in range(28, 80):
+    for cc in range(33, 80):
         for rr, row in enumerate(reversed(obs)):
-            is_fish = obs[rr][cc] == "Y" and (obs[rr][cc - 1] == "Y" or obs[rr][cc - 2] == "Y" or obs[rr][cc + 1] == "Y" or obs[rr][cc - 1] == "Y")
-            is_rod = obs[rr][cc] == "Y" and obs[rr][cc - 1] == "B" and obs[rr][cc + 1] == "B" and obs[rr][cc - 2] == "B" and obs[rr][cc + 2] == "B"
+            rr = len(obs) - 1 - rr
+            is_fish = row[cc] == "Y" and (row[cc - 1] == "Y" or row[cc - 2] == "Y" or row[cc + 1] == "Y" or row[cc - 1] == "Y")
+            is_rod = row[cc] == "Y" and obs[rr - 1][cc] == "Y" and obs[rr - 2][cc] == "Y" and obs[rr - 3][cc] == "Y" and obs[rr - 4][cc] == "Y"
             if rr < 187 and is_rod and not is_fish:
-                print("row: " + str(len(obs) - rr) + " col: " + str(cc))
-            previous = obs[rr][cc]
+                print("row: " + str(rr) + " col: " + str(cc))
+                return
+                
 
 
 ACTIONS_MOVE_ROD = {
