@@ -57,44 +57,14 @@ def get_print_outs(obs):
             print(obs_colors[row][col] + " ", end='')
         print("\n")
 
-def detect_fishing_rod_2(obs):
+def detect_fishing_rod(obs):
     previous = 'B'
-    for cc in range(99, 132):
+    for cc in range(9, 50):
         for rr, row in enumerate(reversed(obs)):
             is_shark = obs[rr][cc] == "BLK" and obs[rr][cc - 1] == "BLK" and obs[rr][cc + 1] == "BLK"
-            if obs[rr][cc] == "BLK" and previous == "B" and rr != 190 and not is_shark:
-                print("row: " + str(rr) + " col: " + str(cc))
+            if obs[rr][cc] == "Y" and previous == "B" and rr != 190 and not is_shark:
+                print("row: " + str(len(obs) - rr) + " col: " + str(cc))
             previous = obs[rr][cc]
-    
-
-def detect_fishing_rod(obs):
-    """ using a 2d array of rgb values, detects the end of the fishing rod
-    @return x: int, y: int of the end of fishing rod
-    """
-    # obs = obs[::-1]
-    # print(obs)
-    MIN_ROD_LENGTH = 2
-    def detect(x, y):
-        """ helper to detect the rod in one spot by checking the pixel is yellow and surrounding is water """
-        if obs[x][y] == 'yellow':
-            left_water = (x - 1 >= 0) and obs[x-1][y] == 'blue'
-            right_water = (x + 1 < len(obs)) and obs[x+1][y] == 'blue'
-            return True
-        return False
-    # iterate observation looking for fishing rod
-    found_rod = False
-    count_rod = 0
-    for rr, row in enumerate(obs):
-        for cc, val in enumerate(row):
-            if detect(rr, cc):
-                found_rod = True
-                count_rod += 1
-            elif found_rod:
-                if count_rod >= MIN_ROD_LENGTH:
-                    return rr - 1, cc - 1
-            else:
-                found_rod = False
-    # raise BaseException("Rod not found")
 
 for _ in range(ITERATIONS):
     done = False
@@ -113,7 +83,7 @@ for _ in range(ITERATIONS):
         # step returns observation: env.observation_space, reward: float, done: bool, info: dict
         observation, reward, done, info = env.step(action)
         obs_colors = observation_to_colors(observation)
-        detect_fishing_rod_2(obs_colors)
+        detect_fishing_rod(obs_colors)
         """
         if once == False:
             get_print_outs(obs_colors)
@@ -126,6 +96,34 @@ for _ in range(ITERATIONS):
 env.close()
 
 
+# def detect_fishing_rod(obs):
+#     """ using a 2d array of rgb values, detects the end of the fishing rod
+#     @return x: int, y: int of the end of fishing rod
+#     """
+#     # obs = obs[::-1]
+#     # print(obs)
+#     MIN_ROD_LENGTH = 2
+#     def detect(x, y):
+#         """ helper to detect the rod in one spot by checking the pixel is yellow and surrounding is water """
+#         if obs[x][y] == 'yellow':
+#             left_water = (x - 1 >= 0) and obs[x-1][y] == 'blue'
+#             right_water = (x + 1 < len(obs)) and obs[x+1][y] == 'blue'
+#             return True
+#         return False
+#     # iterate observation looking for fishing rod
+#     found_rod = False
+#     count_rod = 0
+#     for rr, row in enumerate(obs):
+#         for cc, val in enumerate(row):
+#             if detect(rr, cc):
+#                 found_rod = True
+#                 count_rod += 1
+#             elif found_rod:
+#                 if count_rod >= MIN_ROD_LENGTH:
+#                     return rr - 1, cc - 1
+#             else:
+#                 found_rod = False
+#     # raise BaseException("Rod not found")
 
 """
 {'red: 167 green: 26 blue: 26', = red
