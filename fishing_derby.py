@@ -26,22 +26,15 @@ Q = [[copy.copy(init_q) for __ in range(cols)] for _ in range(rows)]
 # # Box (array dimensional) Box(high=0, low=255, shape=(210, 160, 3), uint8)
 # print(env.observation_space.shape)
 
-lookup_colors = { (167, 26, 26): "red", (24, 26, 167): "blue",
-       (117, 128, 240): "purple", (72, 160, 72): "green",
-       (66, 72, 200): "purple/blue", (232, 232, 74): "yellow",
-       (0, 0, 0): "black", (45, 50, 184): "blue", 
-       (0, 0, 148): "blue", (228, 111, 111): "pink" }
-
-lookup_colors_shorthand = { (167, 26, 26): "R", (24, 26, 167): "B",
+lookup_colors = { (167, 26, 26): "R", (24, 26, 167): "B",
        (117, 128, 240): "P", (72, 160, 72): "G",
        (66, 72, 200): "P", (232, 232, 74): "Y",
        (0, 0, 0): "BLK", (45, 50, 184): "B", 
        (0, 0, 148): "B", (228, 111, 111): "P" }
        
-       
 def get_color(r, g, b):
     """ Get the string representation of a color """
-    return lookup_colors_shorthand[(r, g, b)]
+    return lookup_colors[(r, g, b)]
 
 def observation_to_colors(arr):
     """ 2d array of observation to 2d array of colors """
@@ -58,51 +51,28 @@ def get_print_outs(obs):
         print("\n")
 
 def detect_fishing_rod(obs):
-    for cc in range(33, 80):
+    for cc in range(28, 76):
         for rr, row in enumerate(reversed(obs)):
             rr = len(obs) - 1 - rr
-            is_fish = row[cc] == "Y" and (row[cc - 1] == "Y" or row[cc - 2] == "Y" or row[cc + 1] == "Y" or row[cc - 1] == "Y")
+            is_fish = row[cc] == "Y" and (row[cc - 1] == "Y" or row[cc - 2] in ["Y", "BLK"] or row[cc + 1] in ["Y", "BLK"] or row[cc - 1] == ["Y", "BLK"])
             is_rod = row[cc] == "Y" and obs[rr - 1][cc] == "Y" and obs[rr - 2][cc] == "Y" and obs[rr - 3][cc] == "Y" and obs[rr - 4][cc] == "Y"
             if rr < 187 and is_rod and not is_fish:
                 print("row: " + str(rr) + " col: " + str(cc))
-                return
-                
+                return rr, cc
 
-
-ACTIONS_MOVE_ROD = {
-    0: "NOOP",
-    1: "FIRE",
-    2: "UP",
-    3: "RIGHT",
-    4: "LEFT",
-    5: lambda rod_pos: (rod_pos[0] + 2, rod_pos[1]),
-    6: "UPRIGHT",
-    7: "UPLEFT",
-    8: "DOWNRIGHT",
-    9: "DOWNLEFT",
-    10: "UPFIRE",
-    11: "RIGHTFIRE",
-    12: "LEFTFIRE",
-    13: "DOWNFIRE",
-    14: "UPRIGHTFIRE",
-    15: "UPLEFTFIRE",
-    16: "DOWNRIGHTFIRE",
-    17: "DOWNLEFTFIRE",
-}
+def compute_reward(obs, rewards, rr, cc):
+    # return 100 if fish_is_on_rod else rewards[rr][cc]
 
 for _ in range(ITERATIONS):
     done = False
     ii = 0
-    rod_pos = (77, 43)
     while ii < MAX_MOVES and not done:
         ii += 1
         # epsilon greedy
         if False and random.random() < EXPLORE_PROB:
             action = env.action_space.sample()
         else:
-            action = 5# env.action_space.sample() # find best action given state most likely max(Q[current_hook_x][current_hook_y])
-        rod_pos = ACTIONS_MOVE_ROD[action](rod_pos)
-        print(f"manual move: {rod_pos}")
+            action = 9# env.action_space.sample() # find best action given state most likely max(Q[current_hook_x][current_hook_y])
         env.render()
         # env.action_space returns all actions, sample picks a random action
         # step returns observation: env.observation_space, reward: float, done: bool, info: dict
@@ -111,46 +81,13 @@ for _ in range(ITERATIONS):
         detect_fishing_rod(obs_colors)
         time.sleep(1)
         print("next")
-        """
-        if once == False and ii == 100:
-            get_print_outs(obs_colors)
-            once = True
-        """
+        
         #l = detect_fishing_rod(obs_colors)
         #l.add(f"red: {rgb[0]} green: {rgb[1]} blue: {rgb[2]}")
         #print('step')
     env.reset()
 env.close()
 
-
-# def detect_fishing_rod(obs):
-#     """ using a 2d array of rgb values, detects the end of the fishing rod
-#     @return x: int, y: int of the end of fishing rod
-#     """
-#     # obs = obs[::-1]
-#     # print(obs)
-#     MIN_ROD_LENGTH = 2
-#     def detect(x, y):
-#         """ helper to detect the rod in one spot by checking the pixel is yellow and surrounding is water """
-#         if obs[x][y] == 'yellow':
-#             left_water = (x - 1 >= 0) and obs[x-1][y] == 'blue'
-#             right_water = (x + 1 < len(obs)) and obs[x+1][y] == 'blue'
-#             return True
-#         return False
-#     # iterate observation looking for fishing rod
-#     found_rod = False
-#     count_rod = 0
-#     for rr, row in enumerate(obs):
-#         for cc, val in enumerate(row):
-#             if detect(rr, cc):
-#                 found_rod = True
-#                 count_rod += 1
-#             elif found_rod:
-#                 if count_rod >= MIN_ROD_LENGTH:
-#                     return rr - 1, cc - 1
-#             else:
-#                 found_rod = False
-#     # raise BaseException("Rod not found")
 
 """
 {'red: 167 green: 26 blue: 26', = red
