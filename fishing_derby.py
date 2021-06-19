@@ -53,17 +53,18 @@ def get_print_outs(obs):
     for row in range(len(obs_colors)):
         print(row)
         for col in range(len(obs_colors[0])):
-            #print(col)
+            print(col)
             print(obs_colors[row][col] + " ", end='')
         print("\n")
 
 def detect_fishing_rod(obs):
-    previous = 'B'
-    for cc in range(9, 50):
+    previous = "B"
+    for cc in range(28, 80):
         for rr, row in enumerate(reversed(obs)):
-            is_shark = obs[rr][cc] == "BLK" and obs[rr][cc - 1] == "BLK" and obs[rr][cc + 1] == "BLK"
-            if obs[rr][cc] == "Y" and previous == "B" and rr != 190 and not is_shark:
-                print("row: " + str(len(obs) - rr) + " col: " + str(cc))
+            is_fish = obs[rr][cc] == "Y" and (obs[rr][cc - 1] == "Y" or obs[rr][cc - 2] == "Y" or obs[rr][cc + 1] == "Y" or obs[rr][cc - 1] == "Y")
+            is_rod = obs[rr][cc] == "Y" and obs[rr][cc - 1] == "B" and obs[rr][cc + 1] == "B" and obs[rr][cc - 2] == "B" and obs[rr][cc + 2] == "B"
+            if rr < 187 and is_rod and not is_fish:
+                print("row: " + str(rr) + " col: " + str(cc))
             previous = obs[rr][cc]
 
 for _ in range(ITERATIONS):
@@ -84,8 +85,9 @@ for _ in range(ITERATIONS):
         observation, reward, done, info = env.step(action)
         obs_colors = observation_to_colors(observation)
         detect_fishing_rod(obs_colors)
+        time.sleep(.5)
         """
-        if once == False:
+        if once == False and ii == 100:
             get_print_outs(obs_colors)
             once = True
         """
