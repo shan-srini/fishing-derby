@@ -6,7 +6,7 @@ import time
 # CONSTANTS
 ITERATIONS = 100
 DISCOUNT_FACTOR = 0.8
-EXPLORE_PROB = 0.5 # Eps greedy exploration
+EXPLORE_PROB = 0.4 # Eps greedy exploration
 LEARNING_RATE = 0.01
 # is max moves required? Game ends from bot in reasonable time...
 MAX_MOVES = 1000
@@ -52,7 +52,7 @@ def observation_to_colors(arr):
     return ret
 
 def detect_fishing_rod(obs):
-    for cc in range(28, 76):
+    for cc in range(31, 76):
         for rr, row in enumerate(reversed(obs)):
             rr = len(obs) - 1 - rr
             is_fish = row[cc] == "Y" and (row[cc - 1] == "Y" or row[cc - 2] in ["Y", "BLK"] or row[cc + 1] in ["Y", "BLK"] or row[cc - 1] in ["Y", "BLK"])
@@ -65,13 +65,18 @@ def detect_fishing_rod(obs):
 def detect_fish(obs, rr, cc):
     return obs[rr][cc-1] == "Y" or obs[rr][cc+1] == "Y"
 
+def detect_shark(obs, rr, cc):
+    return "BLK" in [obs[rr][cc-1], obs[rr][cc+1], obs[rr-1][cc], obs[rr+1][cc], obs[rr-2][cc-1], obs[rr+2][cc+1]]
+
 def compute_reward(obs, rr, cc, old_score, new_score):
     # return 100 if fish_is_on_rod else rewards[rr][cc]
     ret = 0
     if new_score > old_score:
-        ret += new_score * 5 # if action incremented the score that's fantastic
+        ret += new_score - old_score * 50 # if action incremented the score that's fantastic
     if detect_fish(obs, rr, cc):
         ret += 100 # 100 reward for hooking a fish
+    if detect_shark(obs, rr, cc):
+        ret -= 50
     return ret
 
 def get_state(obs, rr, cc):
