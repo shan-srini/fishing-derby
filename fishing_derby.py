@@ -3,13 +3,15 @@ import copy
 import random
 import time
 
+random.seed(4100)
+
 # CONSTANTS
 ITERATIONS = 10000
 DISCOUNT_FACTOR = 0.7
-EXPLORE_PROB = 0.3 # Eps greedy exploration
-LEARNING_RATE = 0.4
+EXPLORE_PROB = .2 # Eps greedy exploration
+LEARNING_RATE = 0.5
 # is max moves required? Game ends from bot in reasonable time...
-MAX_MOVES = 10000
+MAX_MOVES = 100000
 
 # Load environment for Fishing Derby
 env = gym.make('FishingDerby-v0')
@@ -56,41 +58,45 @@ def detect_fish(obs, rr, cc):
 def detect_shark_or_bottom(obs, rr, cc):
     return "BLK" in [obs[rr][cc-1], obs[rr][cc+1], obs[rr-1][cc], obs[rr+1][cc], obs[rr-2][cc-1], obs[rr+2][cc+1]]
 
-def compute_reward(obs, rr, cc, old_score, new_score):
+def compute_reward(obs, rr, cc, score_diff):
     ret = 0
+    if score_diff:
+        ret += score_diff * 50
     if detect_fish(obs, rr, cc):
         ret += 100 # 100 reward for hooking a fish
     if detect_shark_or_bottom(obs, rr, cc):
         ret -= 50
-    if rr >= 186: # dont go super low with no fish! it is not rewarding!
+    if rr >= 184: # dont go super low with no fish! it is not rewarding!
         ret -= 50
     return ret
 
 def get_surrounding_at(level, obs, rr, cc):
-    top = obs[rr-level][cc]
-    bottom = obs[rr+level][cc]
-    left = obs[rr][cc-level]
-    right = obs[rr][cc+level]
-    diag_right_up = obs[rr-level][cc+level]
-    diag_left_up = obs[rr-level][cc-level]
-    diag_right_down = obs[rr+level][cc+level]
-    diag_left_down = obs[rr+level][cc-level]
-    return f"{top} {bottom} {left} {right} {diag_right_up} {diag_left_up} {diag_right_down} {diag_left_down}"
+    ret = str()
+    for ii in range(rr - level, rr + level):
+        for jj in range(cc - level, cc + level):
+            ret += obs[ii][jj]
+    return ret
+    # top = obs[rr-level][cc]
+    # bottom = obs[rr+level][cc]
+    # left = obs[rr][cc-level]
+    # right = obs[rr][cc+level]
+    # diag_right_up = obs[rr-level][cc+level]
+    # diag_left_up = obs[rr-level][cc-level]
+    # diag_right_down = obs[rr+level][cc+level]
+    # diag_left_down = obs[rr+level][cc-level]
+    # return f"{top} {bottom} {left} {right} {diag_right_up} {diag_left_up} {diag_right_down} {diag_left_down}"
+
 
 def get_state(obs, rr, cc):
     """ visibility of 2x2 around the fishing rod """
-    level_1 = get_surrounding_at(1, obs, rr, cc)
-    level_2 = get_surrounding_at(2, obs, rr, cc)
-    return f"{level_1} {level_2}"
+    return get_surrounding_at(2, obs, rr, cc)
 
 def find_best_action(state, obs, rr, cc):
     # Check if the corresponding 2x2 environment is in Q
-    if state in Q:
-        return Q[state].index(max(Q[state]))
-    # if state isn't in Q then add it with initial and pick a random move
-    else:
+    # if state isn't in Q then add it
+    if state not in Q:
         Q[state] = copy.copy(init_q)
-        return env.action_space.sample()
+    return Q[state].index(max(Q[state]))
 
 for _ in range(ITERATIONS):
     # is the current iteration done?
@@ -98,13 +104,14 @@ for _ in range(ITERATIONS):
     # for max moves
     ii = 0
     # start the game
-    observation, new_score, done, info = env.step(0)
+    observation, old_score, done, info = env.step(0)
+    obs_colors = observation_to_colors(observation)
     # starting position
     rod_rr, rod_cc = 81, 43
     while ii < MAX_MOVES and not done:
         ii += 1
         # surrounding env of the current rod location
-        state = get_state(observation, rod_rr, rod_cc)
+        state = get_state(obs_colors, rod_rr, rod_cc)
         # epsilon greedy
         # env.action_space returns all actions, sample picks a random action
         if random.random() < EXPLORE_PROB:
@@ -114,6 +121,10 @@ for _ in range(ITERATIONS):
         # make the move
         # step returns observation: env.observation_space, reward: float, done: bool, info: dict
         observation, new_score, done, info = env.step(action)
+        observation, new_score, done, info = env.step(action)
+        observation, new_score, done, info = env.step(action)
+        observation, new_score, done, info = env.step(action)
+        score_diff = new_score - old_score
         # world translated to colors
         obs_colors = observation_to_colors(observation)
         # new position for rod
@@ -122,7 +133,7 @@ for _ in range(ITERATIONS):
         if next_rod_rr == -1:
             continue
         # the surrounding env of next rod location
-        state_next = get_state(observation, next_rod_rr, next_rod_cc)
+        state_next = get_state(obs_colors, next_rod_rr, next_rod_cc)
         # the next action based on the surrounding env of the next rod position
         next_action = find_best_action(state_next, observation, next_rod_rr, next_rod_cc)
         
@@ -133,7 +144,7 @@ for _ in range(ITERATIONS):
         
         q_current = Q[state][action]
         q_next = Q[state_next][next_action]
-        reward = compute_reward(obs_colors, next_rod_rr, next_rod_cc)
+        reward = compute_reward(obs_colors, next_rod_rr, next_rod_cc, score_diff)
         new_q = q_current + LEARNING_RATE * (reward + (DISCOUNT_FACTOR * q_next) - q_current)
         Q[state][action] = new_q
         
@@ -146,12 +157,14 @@ for _ in range(ITERATIONS):
         env.render()
 
         # next iteration
+        old_score = new_score
         rod_rr = next_rod_rr
         rod_cc = next_rod_cc
         
     env.reset()
-    print(f'iteration {_} Q is \n')
+    print(f'\n\niteration {_} Q is')
     print(Q)
+    print(len(Q))
 env.close()
 
 """
