@@ -133,8 +133,9 @@ for _ in range(ITERATIONS):
             print('got a reward!')
         
         env.render()
+        print(get_print_outs(observation))
 
-        # time.sleep(1)
+        time.sleep(100)
         # print("next")
         # print(Q)
         
