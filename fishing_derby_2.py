@@ -32,6 +32,9 @@ obs_space[73] is x pos of fish 2
 221 is y pos of fish 2
 obs_space[74] is x pos of fish 1
 216 is y pos of fish 1
+
+a[75] is x pos of shark
+~212 is y pos of shark
 """
 last = []
 p = set()
