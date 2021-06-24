@@ -142,7 +142,7 @@ class DQNAgent:
 
 				if step > self.start_learning:
 					if not step % self.learn_every_n_step:
-						# print(" -- step : ", step, ' -- mod: ', step % self.learn_every_n_step)
+						#print(" -- step : ", step, ' -- mod: ', step % self.learn_every_n_step)
 						losses = self.train_step()
 						self.loss_stat.append(losses)
 					if step % self.save_every_n_step == 0:
@@ -155,7 +155,7 @@ class DQNAgent:
 			if step > self.start_learning:
 				self.e_decay()
 				
-			if episode % 1000 == 0:
+			if episode % 10 == 0:
 				tf.keras.models.save_model(self.model, "runs/main", save_format="tf")
 				
 			print("--episode: ", episode, '-- step: ', step,  '--reward: ', episode_reward)
@@ -251,7 +251,7 @@ if __name__ == '__main__':
 	except:
 		model = MyModel(num_state, num_actions)
 	target_model = MyModel(num_state, num_actions)
-	agent = DQNAgent(model, target_model,  env, train_nums=5000)
+	agent = DQNAgent(model, target_model,  env, train_nums=50000000000)
 
 	agent.train("runs/main")
 	print("train is over and model is saved")
