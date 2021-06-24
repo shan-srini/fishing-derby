@@ -7,6 +7,7 @@ from gym import wrappers
 import tensorflow.keras.optimizers as ko
 import time
 import math
+import random
 
 
 np.random.seed(1)
@@ -268,6 +269,8 @@ class DQNAgent:
 	def get_action(self, best_action):
 		if np.random.rand() < self.epsilon:
 			action = self.env.action_space.sample()
+			if action > 5:
+    				return random.randrange(0, 6)
 		else:
 			action = best_action
 		return action
