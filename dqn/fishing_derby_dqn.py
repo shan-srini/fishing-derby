@@ -10,6 +10,7 @@ from rl.agents import DQNAgent
 from rl.memory import SequentialMemory
 from rl.policy import LinearAnnealedPolicy, EpsGreedyQPolicy
 
+DQN_RESULT_FILE_PATH = '../DQN_RESULTS/run1/dqn_weights.h5f'
 
 env = gym.make('FishingDerby-v0')
 SHAPE = env.observation_space.shape
@@ -52,8 +53,8 @@ dqn = build_agent(model, actions)
 dqn.compile(Adam(lr=LEARNING_RATE))
 dqn.fit(env, nb_steps=100000, visualize=False, verbose=1)
 
-dqn.save_weights('./DQN_WEIGHTS/shanRun2/dqn_weights.h5f')
-dqn.load_weights('./DQN_WEIGHTS/shanRun2/dqn_weights.h5f')
+dqn.save_weights(f"{DQN_RESULT_FILE_PATH}")
+dqn.load_weights(f"{DQN_RESULT_FILE_PATH}")
 
 scores = dqn.test(env, nb_episodes=1, visualize=True)
-# print(np.mean(scores.history['episode_reward']))
+print(np.mean(scores.history['episode_reward']))
