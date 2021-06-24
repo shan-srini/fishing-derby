@@ -1,0 +1,10 @@
+iteration0 score: 10.0
+iteration1 score: 14.0
+iteration2 score: 8.0
+iteration3 score: 6.0
+iteration4 score: 8.0
+iteration5 score: 4.0
+iteration6 score: 2.0
+iteration7 score: 6.0
+iteration8 score: 2.0
+iteration9 score: 4.0
