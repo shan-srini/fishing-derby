@@ -4,10 +4,15 @@ import random
 import time
 import numpy as np
 import math
+import sys
 import json # for logs
 
+# where to store results
+STORE_Q_FILE_PATH ='./naive/Q'
+
 # CONSTANTS
-ITERATIONS = 10000
+ITERATIONS = 1
+TEST_ITERATIONS = 1
 DISCOUNT_FACTOR = 0.8
 EXPLORE_PROB = .2 # Eps greedy exploration
 LEARNING_RATE = 0.2
@@ -34,7 +39,6 @@ Q = {
     RIGHT: copy.copy(init_q),
     DOWN: copy.copy(init_q),
     LEFT: copy.copy(init_q),
-    HOOKED: copy.copy(init_q)
 }
 # IS_HOOKED = False
 # set custom defaults for Q values
@@ -42,18 +46,10 @@ Q[UP][2] = .1
 Q[RIGHT][3] = .1
 Q[LEFT][4] = .1
 Q[DOWN][5] = .1
-Q[HOOKED][0] = .5
-"""
-.... .................  
-"""
+
 
 def find_best_action(state):
     return np.argmax(Q[state])
-    # Check if the corresponding 2x2 environment is in Q
-    # if state isn't in Q then add it
-    # if state not in Q:
-    #     Q[state] = copy.copy(init_q)
-    # return Q[state].index(max(Q[state]))
 
 def get_rod_position():
     ram = env.unwrapped._get_ram()
@@ -115,7 +111,7 @@ def get_state():
         else:
             return LEFT
 
-def make_moves_for_frames(count):
+def make_moves_for_frames(count, action):
     # step returns observation: env.observation_space, reward: float, done: bool, info: dict
     total_reward = 0
     for _ in range(count):
@@ -123,89 +119,83 @@ def make_moves_for_frames(count):
         total_reward += score
     return observation, total_reward, done, info
 
-for _ in range(ITERATIONS):
-    # is the current iteration done?
-    done = False
-    # for max moves
-    ii = 0
-    # start the game
-    observation, score, done, info = env.step(0)
-    # starting position
-    rod_rr, rod_cc = get_rod_position()
-    score = 0
+def train():
+    for _ in range(ITERATIONS):
+        # is the current iteration done?
+        done = False
+        # for max moves
+        ii = 0
+        # start the game
+        observation, score, done, info = env.step(0)
+        # starting position
+        rod_rr, rod_cc = get_rod_position()
+        score = 0
 
-    while ii < MAX_MOVES and not done:
-        env.render()
-        ii += 1
-        # surrounding env of the current rod location
-        state = get_state()
-        # print(state)
-        # import time
-        # time.sleep(1)
-        # epsilon greedy
-        # env.action_space returns all actions, sample picks a random action
-        if random.random() < EXPLORE_PROB:
-            action = random.randrange(0, 6)
-        else:
+        while ii < MAX_MOVES and not done:
+            env.render()
+            ii += 1
+            # surrounding env of the current rod location
+            state = get_state()
+            # print(state)
+            # epsilon greedy
+            if random.random() < EXPLORE_PROB:
+                action = random.randrange(0, 6)
+            else:
+                action = find_best_action(state)
+            # print(action)
+            # make the move
+            observation, reward, done, info = make_moves_for_frames(1, action)
+            reward = max(0, reward)
+            score+=reward
+            # new position for rod
+            next_rod_rr, next_rod_cc = get_rod_position()
+            # state of next location
+            state_prime = get_state()
+            # the next action based on the surrounding env of the next rod position
+            action_prime = find_best_action(state_prime)
+            
+            q_current = Q[state][action]
+            q_prime = Q[state_prime][action_prime]
+            q_update = q_current + LEARNING_RATE * (reward + (DISCOUNT_FACTOR * q_prime) - q_current)
+            Q[state][action] = q_update
+            
+            # next iteration
+            rod_rr = next_rod_rr
+            rod_cc = next_rod_cc
+
+        env.reset()
+        # print(f"iteration{_} score:", score)
+    env.close()
+    # save output
+    with open(f"{STORE_Q_FILE_PATH}", 'w') as f:
+        f.write(json.dumps(Q, indent=2))
+
+def test():
+    global Q
+    total_scores = []
+    try:
+        with open(f"{STORE_Q_FILE_PATH}", 'r') as f:
+            Q = json.loads(f.read())
+    except:
+        pass
+        # raise FileNotFoundError(f"Need Q in {FILE_PATH}")
+    for ii in range(TEST_ITERATIONS):
+        done = False
+        iteration_score = 0
+        while not done:
+            state = get_state()
             action = find_best_action(state)
-        # print(action)
-        # make the move
-        observation, reward, done, info = make_moves_for_frames(1)
-        reward = max(0, reward)
-        score+=reward
-        # new position for rod
-        next_rod_rr, next_rod_cc = get_rod_position()
-        # state of next location
-        state_prime = get_state()
-        # the next action based on the surrounding env of the next rod position
-        action_prime = find_best_action(state_prime)
-        
-        q_current = Q[state][action]
-        q_prime = Q[state_prime][action_prime]
-        q_update = q_current + LEARNING_RATE * (reward + (DISCOUNT_FACTOR * q_prime) - q_current)
-        Q[state][action] = q_update
-        
-        # next iteration
-        rod_rr = next_rod_rr
-        rod_cc = next_rod_cc
+            observation, reward, done, info = make_moves_for_frames(1, action)
+            iteration_score += reward
+    total_scores.append(iteration_score)
+    print(np.mean(total_scores))
+    env.close()
+    return
 
-    env.reset()
-    print(f"iteration{_} score:", score)
-env.close()
-# log output
-with open('./Q_log', 'a') as f:
-    f.write("\n\n\n")
-    f.write(json.dumps(Q, indent=2))
-    f.write("\n\n\n")
 
-"""
-{'red: 167 green: 26 blue: 26', = red
-'red: 24 green: 26 blue: 167' = blue
-'red: 117 green: 128 blue: 240' = purple, 
-'red: 72 green: 160 blue: 72' = green
-'red: 66 green: 72 blue: 200' = purple/blue, 
-'red: 232 green: 232 blue: 74' = yellow, 
-'red: 0 green: 0 blue: 0' = black, 
-'red: 45 green: 50 blue: 184', = blue
-'red: 0 green: 0 blue: 148', = blue
-'red: 228 green: 111 blue: 111'} = pink
-"""
 
-"""
-    Questions:
-        To what extent will the reward given to us (my_score - opp_score) actually be beneficial
-            Do we need to do any adjustments to this???
-            How deep the hook is, how far the closest fish is
-        How do we extract a policy? What does it look like/mean?
-            Maybe similar to thought questions on HW: a small surrounding environment of the fishing hook
-    Notes:
-        Upping EXPLORE_PROB may help? 
-        Classifier from rgb to objects to find surrounding environment of hook:
-            232 232 74 = (most likely) FISH ... needs more investigation...
-"""
-
-# got this from gym code https://github.com/openai/gym/blob/1d31c12437e8bd7f466139a479705819fff8c111/gym/envs/atari/atari_env.py#L79
-# if self._obs_type == 'ram':
-#             self.observation_space = spaces.Box(low=0, high=255, dtype=np.uint8, shape=(128,))
-#         elif self._obs_type == 'image':
-#             self.observation_space = spaces.Box(low=0, high=255, shape=(screen_height, screen_width, 3), dtype=np.uint8)
+if __name__=='__main__':
+    if len(sys.argv) == 1:
+        train()
+    else:
+        test()
