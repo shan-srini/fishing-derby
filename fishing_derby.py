@@ -39,6 +39,7 @@ Q = {
     RIGHT: copy.copy(init_q),
     DOWN: copy.copy(init_q),
     LEFT: copy.copy(init_q),
+    HOOKED: copy.copy(init_q)
 }
 # IS_HOOKED = False
 # set custom defaults for Q values
@@ -46,7 +47,7 @@ Q[UP][2] = .1
 Q[RIGHT][3] = .1
 Q[LEFT][4] = .1
 Q[DOWN][5] = .1
-
+Q[HOOKED][0] = .1
 
 def find_best_action(state):
     return np.argmax(Q[state])
