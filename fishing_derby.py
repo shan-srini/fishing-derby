@@ -28,7 +28,7 @@ HOOKED = 'hooked'
 
 # Global
 # Load environment for Fishing Derby
-env = gym.make('FishingDerby-v0')
+env = gym.make('FishingDerby-ram-v0')
 env.reset()
 # not sure which one to use
 random.seed(4100); env.seed(4100)
@@ -39,6 +39,7 @@ Q = {
     RIGHT: copy.copy(init_q),
     DOWN: copy.copy(init_q),
     LEFT: copy.copy(init_q),
+    HOOKED: copy.copy(init_q)
 }
 # IS_HOOKED = False
 # set custom defaults for Q values
@@ -46,6 +47,7 @@ Q[UP][2] = .1
 Q[RIGHT][3] = .1
 Q[LEFT][4] = .1
 Q[DOWN][5] = .1
+Q[HOOKED][0] = .5
 
 
 def find_best_action(state):
@@ -168,6 +170,7 @@ def train():
     env.close()
     # save output
     with open(f"{STORE_Q_FILE_PATH}", 'w') as f:
+        f.truncate(0)
         f.write(json.dumps(Q, indent=2))
 
 def test():

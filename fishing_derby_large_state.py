@@ -23,7 +23,7 @@ HOOKED = 'hooked'
 
 # Global
 # Load environment for Fishing Derby
-env = gym.make('FishingDerby-v0')
+env = gym.make('FishingDerby-ram-v0')
 env.reset()
 # not sure which one to use
 random.seed(4100); env.seed(4100)

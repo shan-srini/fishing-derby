@@ -1,11 +1,10 @@
 import gym
 import random
 import numpy as np
+import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Flatten, Convolution2D
 from tensorflow.keras.optimizers import Adam
-import tensorflow as tf
-
 from rl.agents import DQNAgent
 from rl.memory import SequentialMemory
 from rl.policy import LinearAnnealedPolicy, EpsGreedyQPolicy
@@ -19,9 +18,10 @@ SHAPE = env.observation_space.shape
 ACTIONS = 6
 
 # CONSTANTS
-DISCOUNT_FACTOR = .8
-LEARNING_RATE = .001
-EXPLORE_PROB = .2
+ITERATIONS = 100000
+DISCOUNT_FACTOR = .9
+LEARNING_RATE = .005
+EXPLORE_PROB = .4
 
 # issue with uint8?
 tf.compat.v1.disable_eager_execution()
@@ -34,7 +34,7 @@ def generate_model():
     model.add(Flatten())
     model.add(Dense(512, activation='relu'))
     model.add(Dense(256, activation='relu'))
-    model.add(Dense(actions, activation='linear'))
+    model.add(Dense(ACTIONS, activation='linear'))
     return model
 
 MODEL = generate_model()
@@ -49,9 +49,9 @@ def generate_agent():
     dqn = DQNAgent(model=MODEL, nb_actions=ACTIONS, memory=memory, policy=policy, gamma=DISCOUNT_FACTOR)
     return dqn
 
-dqn = build_agent(model, actions)
+dqn = generate_agent()
 dqn.compile(Adam(lr=LEARNING_RATE))
-dqn.fit(env, nb_steps=100000, visualize=False, verbose=1)
+dqn.fit(env, nb_steps=ITERATIONS, visualize=False, verbose=1)
 
 dqn.save_weights(f"{DQN_RESULT_FILE_PATH}")
 dqn.load_weights(f"{DQN_RESULT_FILE_PATH}")
