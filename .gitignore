@@ -5,3 +5,6 @@ Roms
 .DS_Store
 .vscode
 junk
+# too large
+**DQN_RESULTS/**
+**NAIVE_RESULTS/**
