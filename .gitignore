@@ -1,10 +1,10 @@
 bin
 include
 lib
-Roms
 .DS_Store
 .vscode
 # too large
 junk
 **DQN_RESULTS/**
+**video_fishingderby/**
 **NAIVE_RESULTS/**
