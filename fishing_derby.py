@@ -76,6 +76,9 @@ def get_state():
     fishes = get_fish_locations()
     distances = [dist(x1=rr, y1=cc, x2=fish[0], y2=fish[1]) for fish in fishes]
     # favor lower fish by doing things like distances[5] -= .5 or something
+    distances[5] -= .1
+    distances[4] -= .01
+    distances[3] -= .01
     # pick the closest fish
     closest_fish_ix = np.argmin(distances)
     # store state with which direction has closest fish
