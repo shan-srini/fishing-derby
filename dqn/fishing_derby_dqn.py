@@ -18,12 +18,6 @@ SHAPE = env.observation_space.shape
 ACTIONS = env.action_space.n
 
 # CONSTANTS
-<<<<<<< HEAD
-ITERATIONS = 100000
-DISCOUNT_FACTOR = .9
-LEARNING_RATE = .005
-EXPLORE_PROB = .4
-=======
 LEARNING_ITERATIONS = 30000
 TEST_ITERATIONS = 1
 DISCOUNT_FACTOR = .8
@@ -31,7 +25,6 @@ LEARNING_RATE = .01
 EXPLORE_PROB = .3
 
 LEARN = True
->>>>>>> aba14533756ec40233361de8eb2c9d46e8386774
 
 # issue with uint8?
 tf.compat.v1.disable_eager_execution()
@@ -60,14 +53,6 @@ def generate_agent():
 
 dqn = generate_agent()
 dqn.compile(Adam(lr=LEARNING_RATE))
-<<<<<<< HEAD
-dqn.fit(env, nb_steps=ITERATIONS, visualize=False, verbose=1)
-
-dqn.save_weights(f"{DQN_RESULT_FILE_PATH}")
-dqn.load_weights(f"{DQN_RESULT_FILE_PATH}")
-=======
->>>>>>> aba14533756ec40233361de8eb2c9d46e8386774
-
 if LEARN:
     dqn.fit(env, nb_steps=LEARNING_ITERATIONS, visualize=False, verbose=1)
     dqn.save_weights(f"{DQN_RESULT_FILE_PATH}")
