@@ -15,6 +15,9 @@ from tensorflow.python.keras.saving.save import load_model
 np.random.seed(1)
 tf.random.set_seed(1)
 
+TEST_ITERATIONS = 10
+DQN_RESULT_FILE_PATH = "runs/main"
+
 
 class MyModel(tf.keras.Model):
 
@@ -43,6 +46,7 @@ class MyModel(tf.keras.Model):
 
 		output_ = self.output_layer(x)
 		return output_
+	
 
 
 def normalize_obs(obs, scale=256):
@@ -50,25 +54,38 @@ def normalize_obs(obs, scale=256):
 	return obs/scale
 
 
-def test_model():
-	usable_moves = 6
-	env = gym.make('Breakout-ram-v4')
-	print('num_actions: ', env.action_space.n)
-	model = MyModel(128, usable_moves)
+def action_value(model, state):
+	q_values = model.predict(state)
+	best_action = np.argmax(q_values, axis=-1)
+	return best_action[0], q_values[0]	
 
-	obs = env.reset()
-	print('obs_shape: ', obs.shape)
-
-	# tensorflow 2.0: no feed_dict or tf.Session() needed at all
-	best_action, q_values = model.action_value(obs)
-	# 0 [ 0.00896799 -0.02111824]
-	print('res of test model: ', best_action, q_values)
+def test_model(model):
+	total_scores = []
+	env = gym.make('FishingDerby-ram-v0')
+	for ii in range(TEST_ITERATIONS):
+		obs = env.reset()
+		obs = normalize_obs(obs)
+		iteration_score = 0
+		done = False
+		while not done:
+			q_values = model.predict(obs[None])
+			best_actions = np.argmax(q_values, axis=-1)
+			best_action = best_actions[0]
+			next_obs, reward, done, info = env.step(best_action)
+			done = done
+			env.render()
+			next_obs = normalize_obs(next_obs)
+			obs = next_obs
+			iteration_score += reward
+		total_scores.append(iteration_score)
+	env.close()
+	print(np.mean(total_scores))
 
 
 class DQNAgent:
 
 	# def __init__(self, num_states, num_actions, hidden_units, gamma, max_experiences, min_experiences, batch_size, lr):
-	def __init__(self, model, target_model, env, buffer_size=10000, learning_rate=.0015, epsilon=0.6, epsilon_dacay=0.999,
+	def __init__(self, model, target_model, env, buffer_size=10000, learning_rate=.02, epsilon=0.6, epsilon_dacay=0.999,
 				 min_epsilon=.1, gamma=.95, batch_size=32, target_update_iter=1000, learn_every_n_step=32, train_nums=10000,
 				 start_learning=100, save_every_n_step=5000):
 
@@ -238,23 +255,21 @@ class DQNAgent:
 
 
 if __name__ == '__main__':
-
-	# test_model()
-
 	env = gym.make("FishingDerby-ram-v0")
 	env = wrappers.Monitor(env, os.path.join(
 		os.getcwd(), 'video_fishingderby'), force=True)
 	num_actions = 6
 	num_state = env.reset().shape[0]
 	try:
-		model = load_model("runs/main")
+		model = load_model(DQN_RESULT_FILE_PATH)
 	except:
 		model = MyModel(num_state, num_actions)
+	test_model(model)
 	target_model = MyModel(num_state, num_actions)
-	agent = DQNAgent(model, target_model,  env, train_nums=50000000000)
+	agent = DQNAgent(model, target_model,  env, train_nums=5000000000000)
 
-	agent.train("runs/main")
+	agent.train(DQN_RESULT_FILE_PATH)
 	print("train is over and model is saved")
 
-	tf.keras.models.save_model(model, "runs/main", save_format="tf")
+	tf.keras.models.save_model(model, "DQN_RESULT_FILE_PATH, save_format="tf")
 	np.save('dqn_agent_train_lost.npy', agent.loss_stat)
