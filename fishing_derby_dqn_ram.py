@@ -79,6 +79,7 @@ def test_model(model):
 			next_obs = normalize_obs(next_obs)
 			obs = next_obs
 			iteration_score += reward
+		print(iteration_score)
 		total_scores.append(iteration_score)
 	env.close()
 	print(np.mean(total_scores))
