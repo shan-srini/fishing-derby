@@ -1,3 +1,5 @@
+pip install gym; pip install 'gym[atari]'; python -m atari_py.import_roms './roms/fishing_derby.bin'
+
 ## Our current implementations are:
 - fishing_derby_dqn_ram.py
 - fishing_derby_dqn.py

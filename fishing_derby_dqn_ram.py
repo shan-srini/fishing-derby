@@ -17,7 +17,7 @@ np.random.seed(1)
 tf.random.set_seed(1)
 
 TEST_ITERATIONS = 10
-LEARN = False
+LEARN = True
 DQN_RESULT_FILE_PATH = "runs_dqn_ram/main"
 
 
@@ -87,7 +87,7 @@ def test_model(model):
 class DQNAgent:
 
 	# def __init__(self, num_states, num_actions, hidden_units, gamma, max_experiences, min_experiences, batch_size, lr):
-	def __init__(self, model, target_model, env, buffer_size=10000, learning_rate=.02, epsilon=0.6, epsilon_dacay=0.999,
+	def __init__(self, model, target_model, env, buffer_size=10000, learning_rate=.02, epsilon=0.3, epsilon_dacay=0.999,
 				 min_epsilon=.1, gamma=.95, batch_size=32, target_update_iter=1000, learn_every_n_step=32, train_nums=10000,
 				 start_learning=100, save_every_n_step=5000):
 
