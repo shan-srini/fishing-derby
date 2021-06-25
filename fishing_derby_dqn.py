@@ -9,7 +9,7 @@ from rl.agents import DQNAgent
 from rl.memory import SequentialMemory
 from rl.policy import LinearAnnealedPolicy, EpsGreedyQPolicy
 
-DQN_RESULT_FILE_PATH = '../DQN_RESULTS/run4/dqn_weights.h5f'
+DQN_RESULT_FILE_PATH = './runs_dqn/run4/dqn_weights.h5f'
 
 env = gym.make('FishingDerby-v0')
 SHAPE = env.observation_space.shape
@@ -17,6 +17,7 @@ SHAPE = env.observation_space.shape
 # this eliminates the usage of diagonal move combinations
 ACTIONS = env.action_space.n
 
+""" Inspiration from: https://github.com/nicknochnack/KerasRL-OpenAI-Atari-SpaceInvadersv0/blob/main/Space%20Invaders%20Walkthrough.ipynb """
 # CONSTANTS
 LEARNING_ITERATIONS = 30000
 TEST_ITERATIONS = 1

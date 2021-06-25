@@ -11,6 +11,7 @@ import random
 
 from tensorflow.python.keras.saving.save import load_model
 
+""" Inspiration from https://github.com/nancyhwr/DQN_Ram/blob/master/DQN.py """
 
 np.random.seed(1)
 tf.random.set_seed(1)
