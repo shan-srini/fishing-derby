@@ -9,19 +9,29 @@ from rl.agents import DQNAgent
 from rl.memory import SequentialMemory
 from rl.policy import LinearAnnealedPolicy, EpsGreedyQPolicy
 
-DQN_RESULT_FILE_PATH = '../DQN_RESULTS/run1/dqn_weights.h5f'
+DQN_RESULT_FILE_PATH = '../DQN_RESULTS/run4/dqn_weights.h5f'
 
 env = gym.make('FishingDerby-v0')
 SHAPE = env.observation_space.shape
 # only 6 relevant actions that we want to consider to lower action_space
 # this eliminates the usage of diagonal move combinations
-ACTIONS = 6
+ACTIONS = env.action_space.n
 
 # CONSTANTS
+<<<<<<< HEAD
 ITERATIONS = 100000
 DISCOUNT_FACTOR = .9
 LEARNING_RATE = .005
 EXPLORE_PROB = .4
+=======
+LEARNING_ITERATIONS = 30000
+TEST_ITERATIONS = 1
+DISCOUNT_FACTOR = .8
+LEARNING_RATE = .01
+EXPLORE_PROB = .3
+
+LEARN = True
+>>>>>>> aba14533756ec40233361de8eb2c9d46e8386774
 
 # issue with uint8?
 tf.compat.v1.disable_eager_execution()
@@ -40,9 +50,8 @@ def generate_model():
 MODEL = generate_model()
 
 def generate_agent():
-    #policy = LinearAnnealedPolicy(EpsGreedyQPolicy(EXPLORE_PROB), attr='eps', value_max=1., value_min=.1, value_test=.2, nb_steps=10000)
-    policy = EpsGreedyQPolicy(EXPLORE_PROB)
-    memory = SequentialMemory(limit=100000, window_length=3)
+    policy = LinearAnnealedPolicy(EpsGreedyQPolicy(), attr='eps', value_max=1., value_min=EXPLORE_PROB, value_test=EXPLORE_PROB, nb_steps=10000)
+    memory = SequentialMemory(limit=10000, window_length=3)
     # DQN source code
     # https://github.com/keras-rl/keras-rl/blob/216c3145f3dc4d17877be26ca2185ce7db462bad/rl/agents/dqn.py
     # An implementation of the DQN agent as described in Mnih (2013) and Mnih (2015).
@@ -51,10 +60,18 @@ def generate_agent():
 
 dqn = generate_agent()
 dqn.compile(Adam(lr=LEARNING_RATE))
+<<<<<<< HEAD
 dqn.fit(env, nb_steps=ITERATIONS, visualize=False, verbose=1)
 
 dqn.save_weights(f"{DQN_RESULT_FILE_PATH}")
 dqn.load_weights(f"{DQN_RESULT_FILE_PATH}")
+=======
+>>>>>>> aba14533756ec40233361de8eb2c9d46e8386774
 
-scores = dqn.test(env, nb_episodes=1, visualize=True)
-print(np.mean(scores.history['episode_reward']))
+if LEARN:
+    dqn.fit(env, nb_steps=LEARNING_ITERATIONS, visualize=False, verbose=1)
+    dqn.save_weights(f"{DQN_RESULT_FILE_PATH}")
+else:
+    dqn.load_weights(f"{DQN_RESULT_FILE_PATH}")
+    scores = dqn.test(env, nb_episodes=TEST_ITERATIONS, visualize=False)
+    print(np.mean(scores.history['episode_reward']))

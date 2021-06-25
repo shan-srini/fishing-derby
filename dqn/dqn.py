@@ -271,5 +271,5 @@ if __name__ == '__main__':
 	agent.train(DQN_RESULT_FILE_PATH)
 	print("train is over and model is saved")
 
-	tf.keras.models.save_model(model, "DQN_RESULT_FILE_PATH, save_format="tf")
+	tf.keras.models.save_model(model, DQN_RESULT_FILE_PATH, save_format="tf")
 	np.save('dqn_agent_train_lost.npy', agent.loss_stat)
