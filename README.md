@@ -1,8 +1,8 @@
 ### If you need to install gym:
-pip install gym; pip install 'gym[atari]';
+```pip install gym; pip install 'gym[atari]';```
 
 ### To install rom:
-python -m atari_py.import_roms './roms/fishing_derby.bin';
+```python -m atari_py.import_roms './roms/fishing_derby.bin';```
 
 ### If you need to install rest of dependencies:
 pip install -r requirements.txt
