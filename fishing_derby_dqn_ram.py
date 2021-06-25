@@ -174,7 +174,7 @@ class DQNAgent:
 				self.e_decay()
 				
 			if episode % 10 == 0:
-				tf.keras.models.save_model(self.model, "runs/main", save_format="tf")
+				tf.keras.models.save_model(self.model, DQN_RESULT_FILE_PATH, save_format="tf")
 				
 			print("--episode: ", episode, '-- step: ', step,  '--reward: ', episode_reward)
 			episode += 1
