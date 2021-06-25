@@ -16,7 +16,8 @@ np.random.seed(1)
 tf.random.set_seed(1)
 
 TEST_ITERATIONS = 10
-DQN_RESULT_FILE_PATH = "runs/main"
+TESTING = False
+DQN_RESULT_FILE_PATH = "runs_dqn_ram/main"
 
 
 class MyModel(tf.keras.Model):
@@ -264,12 +265,14 @@ if __name__ == '__main__':
 		model = load_model(DQN_RESULT_FILE_PATH)
 	except:
 		model = MyModel(num_state, num_actions)
-	test_model(model)
-	target_model = MyModel(num_state, num_actions)
-	agent = DQNAgent(model, target_model,  env, train_nums=5000000000000)
+	if TESTING:
+    		test_model(model)
+	else:
+		target_model = MyModel(num_state, num_actions)
+		agent = DQNAgent(model, target_model,  env, train_nums=5000000000000)
 
-	agent.train(DQN_RESULT_FILE_PATH)
-	print("train is over and model is saved")
+		agent.train(DQN_RESULT_FILE_PATH)
+		print("train is over and model is saved")
 
-	tf.keras.models.save_model(model, DQN_RESULT_FILE_PATH, save_format="tf")
-	np.save('dqn_agent_train_lost.npy', agent.loss_stat)
+		tf.keras.models.save_model(model, DQN_RESULT_FILE_PATH, save_format="tf")
+		np.save('dqn_agent_train_lost.npy', agent.loss_stat)
