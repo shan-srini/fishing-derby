@@ -16,7 +16,7 @@ np.random.seed(1)
 tf.random.set_seed(1)
 
 TEST_ITERATIONS = 10
-TESTING = False
+LEARN = False
 DQN_RESULT_FILE_PATH = "runs_dqn_ram/main"
 
 
@@ -265,7 +265,7 @@ if __name__ == '__main__':
 		model = load_model(DQN_RESULT_FILE_PATH)
 	except:
 		model = MyModel(num_state, num_actions)
-	if TESTING:
+	if not LEARN:
     		test_model(model)
 	else:
 		target_model = MyModel(num_state, num_actions)
