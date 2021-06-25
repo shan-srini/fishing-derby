@@ -13,7 +13,7 @@ LEARN = False
 
 # CONSTANTS
 ITERATIONS = 1
-TEST_ITERATIONS = 1
+TEST_ITERATIONS = 10
 DISCOUNT_FACTOR = 0.8
 EXPLORE_PROB = .2 # Eps greedy exploration
 LEARNING_RATE = 0.2
@@ -186,6 +186,7 @@ def test():
         pass
         # raise FileNotFoundError(f"Need Q in {FILE_PATH}")
     for ii in range(TEST_ITERATIONS):
+        env.reset()
         done = False
         iteration_score = 0
         while not done:
@@ -193,7 +194,7 @@ def test():
             action = find_best_action(state)
             observation, reward, done, info = make_moves_for_frames(1, action)
             iteration_score += reward
-    total_scores.append(iteration_score)
+        total_scores.append(iteration_score)
     print(np.mean(total_scores))
     env.close()
     return
