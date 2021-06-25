@@ -5,7 +5,7 @@
 ```python -m atari_py.import_roms './roms/fishing_derby.bin';```
 
 ### If you need to install rest of dependencies:
-pip install -r requirements.txt
+```pip install -r requirements.txt;```
 
 ## Our current implementations are:
 - fishing_derby_dqn_ram.py
