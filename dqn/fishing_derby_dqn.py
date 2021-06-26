@@ -19,13 +19,13 @@ SHAPE = env.observation_space.shape
 ACTIONS = env.action_space.n
 
 # CONSTANTS
-LEARNING_ITERATIONS = 30000
+LEARNING_ITERATIONS = 10000
 TEST_ITERATIONS = 1
-DISCOUNT_FACTOR = .8
-LEARNING_RATE = .01
+DISCOUNT_FACTOR = .99
+LEARNING_RATE = .001
 EXPLORE_PROB = .3
 
-LEARN = True
+LEARN = False
 
 # issue with uint8?
 tf.compat.v1.disable_eager_execution()
@@ -45,6 +45,7 @@ MODEL = generate_model()
 
 def generate_agent():
     policy = LinearAnnealedPolicy(EpsGreedyQPolicy(), attr='eps', value_max=1., value_min=EXPLORE_PROB, value_test=EXPLORE_PROB, nb_steps=10000)
+    policy = EpsGreedyQPolicy(.3)
     memory = SequentialMemory(limit=10000, window_length=3)
     # DQN source code
     # https://github.com/keras-rl/keras-rl/blob/216c3145f3dc4d17877be26ca2185ce7db462bad/rl/agents/dqn.py

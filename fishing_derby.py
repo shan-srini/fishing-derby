@@ -9,6 +9,7 @@ import json # for logs
 
 # where to store results
 STORE_Q_FILE_PATH ='./naive/Q'
+LEARN = True
 
 # CONSTANTS
 ITERATIONS = 1
@@ -199,7 +200,7 @@ def test():
 
 
 if __name__=='__main__':
-    if len(sys.argv) == 1:
+    if LEARN:
         train()
     else:
         test()
